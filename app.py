@@ -2,24 +2,20 @@ from flask import Flask
 
 app = Flask(__name__)
 
-# 1. RUTA PRINCIPAL
+# Paso 2 de la tarea: Ruta principal con nombre y propósito del negocio
 @app.route('/')
 def index():
     return """
     <h1>Bienvenido al Sistema de Inventario - Alther Tech</h1>
-    <p><b>Propósito:</b> Control de stock automatizado y gestión de suministros en tiempo real.</p>
+    <p>Propósito: Control automatizado de stock y gestión de suministros en tiempo real.</p>
     <hr>
-    <p>Para probar una consulta, escriba en la barra de direcciones: <b>/item/TU_CODIGO</b></p>
+    <p>Use la ruta /item/codigo para consultar un producto.</p>
     """
 
-# 2. RUTA DINÁMICA
+# Paso 3 de la tarea: Ruta dinámica adaptada a Inventario (/item/<codigo>)
 @app.route('/item/<codigo>')
 def consultar_item(codigo):
-    return f"""
-    <h2>Detalles del Inventario</h2>
-    <p>Producto consultado con Código: <b>{codigo}</b></p>
-    <p>Estado actual: <b>Disponible en bodega principal.</b></p>
-    """
+    return f"<h2>Consulta de Inventario</h2><p>Producto con Código: <b>{codigo}</b> – Consulta exitosa: Disponible en bodega.</p>"
 
 if __name__ == '__main__':
     app.run(debug=True)
