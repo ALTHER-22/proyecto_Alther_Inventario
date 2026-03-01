@@ -1,27 +1,22 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>{% block title %}{% endblock %} - Alther Tech</title>
 </head>
 <body>
-    <header style="background-color: #333; color: white; text-align: center; padding: 10px;">
-        <h1>Alther Tech</h1>
-        <nav>
-            <a href="/" style="color: white; margin: 0 10px;">Inicio</a> |
-            <a href="/about" style="color: white; margin: 0 10px;">Acerca de</a> |
-            <a href="/item/PROD-001" style="color: white; margin: 0 10px;">Ejemplo Producto</a>
-        </nav>
-    </header>
 
-    <main style="padding: 20px; min-height: 400px;">
-        {% block content %}{% endblock %}
-    </main>
+<h1>Sistema de Inventario</h1>
 
-    <footer style="background-color: #333; color: white; text-align: center; padding: 10px;">
-        <p>&copy; 2026 Alther Tech - Control de Stock.</p>
-    </footer>
+<nav>
+    <a href="/">Inicio</a> |
+    <a href="/about">Acerca de</a>
+</nav>
+
+<hr>
+
+{% block content %}
+{% endblock %}
+
 </body>
 </html>

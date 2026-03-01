@@ -1,22 +1,43 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
+from inventario import Inventario
 
 app = Flask(__name__)
+inventario = Inventario()
 
-# 1. RUTA PRINCIPAL (Ahora usa index.html)
-@app.route('/')
-def index():
-    return render_template('index.html')
 
-# 2. RUTA ACERCA DE (Nueva para esta semana)
-@app.route('/about')
+@app.route("/")
+def inicio():
+    productos = inventario.obtener_productos()
+    return render_template("index.html", productos=productos)
+
+
+@app.route("/agregar", methods=["POST"])
+def agregar():
+    nombre = request.form["nombre"]
+    precio = request.form["precio"]
+    cantidad = request.form["cantidad"]
+
+    inventario.agregar_producto(nombre, precio, cantidad)
+    return redirect("/")
+
+
+@app.route("/eliminar/<int:id>")
+def eliminar(id):
+    inventario.eliminar_producto(id)
+    return redirect("/")
+
+
+@app.route("/buscar", methods=["POST"])
+def buscar():
+    texto = request.form["buscar"]
+    productos = inventario.buscar_producto(texto)
+    return render_template("index.html", productos=productos)
+
+
+@app.route("/about")
 def about():
-    return render_template('about.html')
+    return render_template("about.html")
 
-# 3. RUTA DINÁMICA (Usa item.html y pasa el código)
-@app.route('/item/<codigo>')
-def consultar_item(codigo):
-    return render_template('item.html', codigo=codigo)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
-    # Arreglo para Render
