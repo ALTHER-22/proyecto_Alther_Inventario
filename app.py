@@ -1,25 +1,25 @@
 from flask import Flask, render_template, request, redirect
-from inventario import db, Producto
+import pymysql
 import json
 import csv
+import sys
+import os
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Conexión'))
+from conexion import get_connection
 
 app = Flask(__name__)
-
-# CONFIGURAR BASE DE DATOS
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///inventario.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
-
-# CREAR BD
-with app.app_context():
-    db.create_all()
 
 # ===============================
 # RUTA PRINCIPAL
 # ===============================
 @app.route("/")
 def index():
-    productos = Producto.query.all()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM productos")
+    productos = cursor.fetchall()
+    conn.close()
     return render_template("index.html", productos=productos)
 
 # ===============================
@@ -38,10 +38,12 @@ def agregar():
     precio = float(request.form["precio"])
     cantidad = int(request.form["cantidad"])
 
-    nuevo = Producto(nombre=nombre, precio=precio, cantidad=cantidad)
-    db.session.add(nuevo)
-    db.session.commit()
-
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO productos (nombre, precio, cantidad) VALUES (%s, %s, %s)",
+                   (nombre, precio, cantidad))
+    conn.commit()
+    conn.close()
     return redirect("/")
 
 # ===============================
@@ -49,9 +51,11 @@ def agregar():
 # ===============================
 @app.route("/eliminar/<int:id>")
 def eliminar(id):
-    producto = Producto.query.get(id)
-    db.session.delete(producto)
-    db.session.commit()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM productos WHERE id = %s", (id,))
+    conn.commit()
+    conn.close()
     return redirect("/")
 
 # ===============================
@@ -59,17 +63,87 @@ def eliminar(id):
 # ===============================
 @app.route("/editar/<int:id>", methods=["GET", "POST"])
 def editar(id):
-    producto = Producto.query.get(id)
+    conn = get_connection()
+    cursor = conn.cursor()
 
     if request.method == "POST":
-        producto.nombre = request.form["nombre"]
-        producto.precio = float(request.form["precio"])
-        producto.cantidad = int(request.form["cantidad"])
-
-        db.session.commit()
+        nombre = request.form["nombre"]
+        precio = float(request.form["precio"])
+        cantidad = int(request.form["cantidad"])
+        cursor.execute("UPDATE productos SET nombre=%s, precio=%s, cantidad=%s WHERE id=%s",
+                       (nombre, precio, cantidad, id))
+        conn.commit()
+        conn.close()
         return redirect("/")
 
+    cursor.execute("SELECT * FROM productos WHERE id = %s", (id,))
+    producto = cursor.fetchone()
+    conn.close()
     return render_template("editar.html", producto=producto)
+
+# ===============================
+# VER USUARIOS
+# ===============================
+@app.route("/usuarios")
+def usuarios():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM usuarios")
+    lista_usuarios = cursor.fetchall()
+    conn.close()
+    return render_template("usuarios.html", usuarios=lista_usuarios)
+
+# ===============================
+# AGREGAR USUARIO
+# ===============================
+@app.route("/agregar_usuario", methods=["POST"])
+def agregar_usuario():
+    nombre = request.form["nombre"]
+    mail = request.form["mail"]
+    password = request.form["password"]
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO usuarios (nombre, mail, password) VALUES (%s, %s, %s)",
+                   (nombre, mail, password))
+    conn.commit()
+    conn.close()
+    return redirect("/usuarios")
+
+# ===============================
+# ELIMINAR USUARIO
+# ===============================
+@app.route("/eliminar_usuario/<int:id>")
+def eliminar_usuario(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM usuarios WHERE id_usuario = %s", (id,))
+    conn.commit()
+    conn.close()
+    return redirect("/usuarios")
+
+# ===============================
+# EDITAR USUARIO
+# ===============================
+@app.route("/editar_usuario/<int:id>", methods=["GET", "POST"])
+def editar_usuario(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    if request.method == "POST":
+        nombre = request.form["nombre"]
+        mail = request.form["mail"]
+        password = request.form["password"]
+        cursor.execute("UPDATE usuarios SET nombre=%s, mail=%s, password=%s WHERE id_usuario=%s",
+                       (nombre, mail, password, id))
+        conn.commit()
+        conn.close()
+        return redirect("/usuarios")
+
+    cursor.execute("SELECT * FROM usuarios WHERE id_usuario = %s", (id,))
+    usuario = cursor.fetchone()
+    conn.close()
+    return render_template("editar_usuario.html", usuario=usuario)
 
 # ===============================
 # GUARDAR TXT
@@ -77,10 +151,8 @@ def editar(id):
 @app.route("/guardar_txt", methods=["POST"])
 def guardar_txt():
     nombre = request.form["nombre"]
-
     with open("inventario/data/datos.txt", "a") as f:
         f.write(nombre + "\n")
-
     return redirect("/datos")
 
 # ===============================
@@ -89,12 +161,9 @@ def guardar_txt():
 @app.route("/guardar_json", methods=["POST"])
 def guardar_json():
     nombre = request.form["nombre"]
-
     data = {"nombre": nombre}
-
     with open("inventario/data/datos.json", "w") as f:
         json.dump(data, f)
-
     return redirect("/datos")
 
 # ===============================
@@ -103,11 +172,9 @@ def guardar_json():
 @app.route("/guardar_csv", methods=["POST"])
 def guardar_csv():
     nombre = request.form["nombre"]
-
     with open("inventario/data/datos.csv", "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([nombre])
-
     return redirect("/datos")
 
 # ===============================
@@ -115,7 +182,6 @@ def guardar_csv():
 # ===============================
 @app.route("/datos")
 def ver_datos():
-
     try:
         with open("inventario/data/datos.txt") as f:
             txt = f.readlines()
