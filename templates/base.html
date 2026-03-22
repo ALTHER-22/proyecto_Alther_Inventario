@@ -11,7 +11,13 @@
 <nav>
     <a href="/">Inicio</a> |
     <a href="/about">Acerca de</a> |
-    <a href="/usuarios">Usuarios</a>
+    <a href="/usuarios">Usuarios</a> |
+    {% if current_user.is_authenticated %}
+        Hola, {{ current_user.nombre }} |
+        <a href="/logout">Cerrar sesión</a>
+    {% else %}
+        <a href="/login">Iniciar sesión</a>
+    {% endif %}
 </nav>
 
 <hr>
