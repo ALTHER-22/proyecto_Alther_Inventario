@@ -212,7 +212,7 @@ def eliminar_cliente(id):
     return redirect("/clientes")
 
 # ===============================
-# USUARIOS
+# USUARIOS - CRUD
 # ===============================
 @app.route("/usuarios")
 @login_required
@@ -223,6 +223,49 @@ def usuarios():
     lista_usuarios = cursor.fetchall()
     conn.close()
     return render_template("usuarios.html", usuarios=lista_usuarios)
+
+@app.route("/agregar_usuario", methods=["POST"])
+@login_required
+def agregar_usuario():
+    nombre = request.form["nombre"]
+    email = request.form["email"]
+    password = generate_password_hash(request.form["password"])
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO usuarios (nombre, email, password) VALUES (%s, %s, %s)",
+                   (nombre, email, password))
+    conn.commit()
+    conn.close()
+    return redirect("/usuarios")
+
+@app.route("/editar_usuario/<int:id>", methods=["GET", "POST"])
+@login_required
+def editar_usuario(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if request.method == "POST":
+        nombre = request.form["nombre"]
+        email = request.form["email"]
+        password = generate_password_hash(request.form["password"])
+        cursor.execute("UPDATE usuarios SET nombre=%s, email=%s, password=%s WHERE id_usuario=%s",
+                       (nombre, email, password, id))
+        conn.commit()
+        conn.close()
+        return redirect("/usuarios")
+    cursor.execute("SELECT * FROM usuarios WHERE id_usuario = %s", (id,))
+    usuario = cursor.fetchone()
+    conn.close()
+    return render_template("editar_usuario.html", usuario=usuario)
+
+@app.route("/eliminar_usuario/<int:id>")
+@login_required
+def eliminar_usuario(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM usuarios WHERE id_usuario = %s", (id,))
+    conn.commit()
+    conn.close()
+    return redirect("/usuarios")
 
 # ===============================
 # GUARDAR TXT / JSON / CSV

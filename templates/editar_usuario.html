@@ -1,26 +1,25 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Usuario</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <h1>Editar Usuario</h1>
-    <nav>
-        <a href="/">Inicio</a> |
-        <a href="/usuarios">Usuarios</a>
-    </nav>
-    <hr>
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar Usuario</h2>
 
     <form action="/editar_usuario/{{ usuario['id_usuario'] }}" method="POST">
-        <input type="text" name="nombre" value="{{ usuario['nombre'] }}" required>
-        <input type="email" name="mail" value="{{ usuario['mail'] }}" required>
-        <input type="password" name="password" placeholder="Nueva contraseña" required>
-        <button type="submit">Guardar cambios</button>
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control"
+                   value="{{ usuario['nombre'] }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control"
+                   value="{{ usuario['email'] }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nueva contraseña</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success">Guardar cambios</button>
+        <a href="/usuarios" class="btn btn-secondary">Cancelar</a>
     </form>
-
-    <br>
-    <a href="/usuarios">Cancelar</a>
-</body>
-</html>
+</div>
+{% endblock %}

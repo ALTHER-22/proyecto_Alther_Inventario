@@ -1,46 +1,48 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Usuarios</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <h1>Gestión de Usuarios</h1>
-    <nav>
-        <a href="/">Inicio</a> |
-        <a href="/about">Acerca de</a> |
-        <a href="/usuarios">Usuarios</a>
-    </nav>
-    <hr>
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Gestión de Usuarios</h2>
 
-    <h2>Agregar Usuario</h2>
-    <form action="/agregar_usuario" method="POST">
-        <input type="text" name="nombre" placeholder="Nombre" required>
-        <input type="email" name="mail" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Agregar</button>
+    <h4 class="mt-3">Agregar Usuario</h4>
+    <form action="/agregar_usuario" method="POST" class="row g-2 mb-4">
+        <div class="col-md-3">
+            <input type="text" name="nombre" placeholder="Nombre" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+            <input type="email" name="email" placeholder="Email" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+            <input type="password" name="password" placeholder="Password" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">Agregar</button>
+        </div>
     </form>
 
-    <h2>Usuarios registrados</h2>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Acciones</th>
-        </tr>
-        {% for u in usuarios %}
-        <tr>
-            <td>{{ u['id_usuario'] }}</td>
-            <td>{{ u['nombre'] }}</td>
-            <td>{{ u['mail'] }}</td>
-            <td>
-                <a href="/editar_usuario/{{ u['id_usuario'] }}">Editar</a> |
-                <a href="/eliminar_usuario/{{ u['id_usuario'] }}">Eliminar</a>
-            </td>
-        </tr>
-        {% endfor %}
+    <h4>Usuarios registrados</h4>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <td>{{ u['id_usuario'] }}</td>
+                <td>{{ u['nombre'] }}</td>
+                <td>{{ u['email'] }}</td>
+                <td>
+                    <a href="/editar_usuario/{{ u['id_usuario'] }}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="/eliminar_usuario/{{ u['id_usuario'] }}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Eliminar este usuario?')">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-</body>
-</html>
+</div>
+{% endblock %}
