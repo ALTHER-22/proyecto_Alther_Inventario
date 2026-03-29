@@ -1,67 +1,80 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="container mt-4">
 
-<h2>Agregar Producto</h2>
+    <h2>Agregar Producto</h2>
+    <form action="/agregar" method="post" class="row g-2 mb-4">
+        <div class="col-md-3">
+            <input type="text" name="nombre" placeholder="Nombre" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+            <input type="number" step="0.01" name="precio" placeholder="Precio" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+            <input type="number" name="cantidad" placeholder="Cantidad" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">Agregar</button>
+        </div>
+    </form>
 
-<form action="/agregar" method="post">
-    <input type="text" name="nombre" placeholder="Nombre" required>
-    <input type="number" step="0.01" name="precio" placeholder="Precio" required>
-    <input type="number" name="cantidad" placeholder="Cantidad" required>
-    <button type="submit">Agregar</button>
-</form>
+    <hr>
 
-<hr>
+    <h2>Productos en Inventario</h2>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td>{{ p['id'] }}</td>
+                <td>{{ p['nombre'] }}</td>
+                <td>${{ p['precio'] }}</td>
+                <td>{{ p['cantidad'] }}</td>
+                <td>
+                    <a href="/productos/editar/{{ p['id'] }}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="/productos/eliminar/{{ p['id'] }}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-<h2>Productos en Inventario</h2>
+    <hr>
 
-<table border="1">
-<tr>
-<th>ID</th>
-<th>Nombre</th>
-<th>Precio</th>
-<th>Cantidad</th>
-<th>Acciones</th>
-</tr>
+    <h2>Guardar en Archivos</h2>
+    <div class="row g-2">
+        <div class="col-md-4">
+            <form action="/guardar_txt" method="post" class="d-flex gap-2">
+                <input name="nombre" placeholder="Nombre" class="form-control">
+                <button type="submit" class="btn btn-secondary">Guardar TXT</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <form action="/guardar_json" method="post" class="d-flex gap-2">
+                <input name="nombre" placeholder="Nombre" class="form-control">
+                <button type="submit" class="btn btn-secondary">Guardar JSON</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <form action="/guardar_csv" method="post" class="d-flex gap-2">
+                <input name="nombre" placeholder="Nombre" class="form-control">
+                <button type="submit" class="btn btn-secondary">Guardar CSV</button>
+            </form>
+        </div>
+    </div>
 
-{% for p in productos %}
-<tr>
-<td>{{ p.id }}</td>
-<td>{{ p.nombre }}</td>
-<td>{{ p.precio }}</td>
-<td>{{ p.cantidad }}</td>
+    <br>
+    <a href="/datos" class="btn btn-info mt-2">Ver Datos Guardados</a>
 
-<td>
-<a href="/editar/{{p.id}}">Editar</a> |
-<a href="/eliminar/{{p.id}}">Eliminar</a>
-</td>
-
-</tr>
-{% endfor %}
-
-</table>
-
-<hr>
-
-<h2>Guardar en Archivos</h2>
-
-<form action="/guardar_txt" method="post">
-    <input name="nombre" placeholder="Nombre">
-    <button type="submit">Guardar TXT</button>
-</form>
-
-<form action="/guardar_json" method="post">
-    <input name="nombre" placeholder="Nombre">
-    <button type="submit">Guardar JSON</button>
-</form>
-
-<form action="/guardar_csv" method="post">
-    <input name="nombre" placeholder="Nombre">
-    <button type="submit">Guardar CSV</button>
-</form>
-
-<br><br>
-
-<a href="/datos">Ver Datos Guardados</a>
-
+</div>
 {% endblock %}

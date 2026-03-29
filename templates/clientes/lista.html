@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Gestión de Clientes</h2>
+    <a href="/clientes/nuevo" class="btn btn-primary mb-3">+ Nuevo Cliente</a>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in clientes %}
+            <tr>
+                <td>{{ c['id_cliente'] }}</td>
+                <td>{{ c['nombre'] }}</td>
+                <td>{{ c['email'] }}</td>
+                <td>{{ c['telefono'] }}</td>
+                <td>{{ c['direccion'] }}</td>
+                <td>
+                    <a href="/clientes/editar/{{ c['id_cliente'] }}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="/clientes/eliminar/{{ c['id_cliente'] }}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Eliminar este cliente?')">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
