@@ -15,13 +15,19 @@
                 <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link" href="/productos">Productos</a></li>
                 <li class="nav-item"><a class="nav-link" href="/clientes">Clientes</a></li>
+                {% if current_user.is_authenticated and current_user.es_admin() %}
                 <li class="nav-item"><a class="nav-link" href="/usuarios">Usuarios</a></li>
+                {% endif %}
                 <li class="nav-item"><a class="nav-link" href="/about">Acerca de</a></li>
             </ul>
             <ul class="navbar-nav">
                 {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <span class="nav-link text-light">👤 {{ current_user.nombre }}</span>
+                        <span class="nav-link text-light">👤 {{ current_user.nombre }}
+                        {% if current_user.es_admin() %}
+                        <span class="badge bg-warning text-dark ms-1">Admin</span>
+                        {% endif %}
+                        </span>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">Cerrar sesión</a>

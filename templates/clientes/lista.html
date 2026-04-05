@@ -2,7 +2,9 @@
 {% block content %}
 <div class="container mt-4">
     <h2>Gestión de Clientes</h2>
+    {% if current_user.es_admin() %}
     <a href="/clientes/nuevo" class="btn btn-primary mb-3">+ Nuevo Cliente</a>
+    {% endif %}
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
@@ -11,7 +13,9 @@
                 <th>Email</th>
                 <th>Teléfono</th>
                 <th>Dirección</th>
+                {% if current_user.es_admin() %}
                 <th>Acciones</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -22,11 +26,13 @@
                 <td>{{ c['email'] }}</td>
                 <td>{{ c['telefono'] }}</td>
                 <td>{{ c['direccion'] }}</td>
+                {% if current_user.es_admin() %}
                 <td>
                     <a href="/clientes/editar/{{ c['id_cliente'] }}" class="btn btn-warning btn-sm">Editar</a>
                     <a href="/clientes/eliminar/{{ c['id_cliente'] }}" class="btn btn-danger btn-sm"
                        onclick="return confirm('¿Eliminar este cliente?')">Eliminar</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

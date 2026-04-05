@@ -3,6 +3,7 @@
 {% block content %}
 <div class="container mt-4">
 
+    {% if current_user.es_admin() %}
     <h2>Agregar Producto</h2>
     <form action="/agregar" method="post" class="row g-2 mb-4">
         <div class="col-md-3">
@@ -18,8 +19,8 @@
             <button type="submit" class="btn btn-primary w-100">Agregar</button>
         </div>
     </form>
-
     <hr>
+    {% endif %}
 
     <h2>Productos en Inventario</h2>
     <table class="table table-bordered table-striped">
@@ -29,7 +30,9 @@
                 <th>Nombre</th>
                 <th>Precio</th>
                 <th>Cantidad</th>
+                {% if current_user.es_admin() %}
                 <th>Acciones</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -39,18 +42,20 @@
                 <td>{{ p['nombre'] }}</td>
                 <td>${{ p['precio'] }}</td>
                 <td>{{ p['cantidad'] }}</td>
+                {% if current_user.es_admin() %}
                 <td>
                     <a href="/productos/editar/{{ p['id'] }}" class="btn btn-warning btn-sm">Editar</a>
                     <a href="/productos/eliminar/{{ p['id'] }}" class="btn btn-danger btn-sm"
                        onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
+    {% if current_user.es_admin() %}
     <hr>
-
     <h2>Guardar en Archivos</h2>
     <div class="row g-2">
         <div class="col-md-4">
@@ -72,9 +77,9 @@
             </form>
         </div>
     </div>
-
     <br>
     <a href="/datos" class="btn btn-info mt-2">Ver Datos Guardados</a>
+    {% endif %}
 
 </div>
 {% endblock %}

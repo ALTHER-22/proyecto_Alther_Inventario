@@ -31,7 +31,7 @@ def load_user(user_id):
     conn.close()
     if u:
         from models.usuario import Usuario
-        return Usuario(u['id_usuario'], u['nombre'], u['email'], u['password'])
+        return Usuario(u['id_usuario'], u['nombre'], u['email'], u['password'], u.get('rol', 'usuario'))
     return None
 
 # ===============================
@@ -49,7 +49,7 @@ def login():
         conn.close()
         if u and check_password_hash(u['password'], password):
             from models.usuario import Usuario
-            usuario = Usuario(u['id_usuario'], u['nombre'], u['email'], u['password'])
+            usuario = Usuario(u['id_usuario'], u['nombre'], u['email'], u['password'], u.get('rol', 'usuario'))
             login_user(usuario)
             return redirect("/")
         else:
@@ -57,7 +57,7 @@ def login():
     return render_template("login.html")
 
 # ===============================
-# REGISTRO
+# REGISTRO (crea cliente + usuario normal)
 # ===============================
 @app.route("/registro", methods=["GET", "POST"])
 def registro():
@@ -67,11 +67,15 @@ def registro():
         password = generate_password_hash(request.form["password"])
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO usuarios (nombre, email, password) VALUES (%s, %s, %s)",
+        # Guardar en clientes
+        cursor.execute("INSERT INTO clientes (nombre, email, telefono, direccion) VALUES (%s, %s, %s, %s)",
+                       (nombre, email, '', ''))
+        # Guardar en usuarios con rol usuario
+        cursor.execute("INSERT INTO usuarios (nombre, email, password, rol) VALUES (%s, %s, %s, 'usuario')",
                        (nombre, email, password))
         conn.commit()
         conn.close()
-        flash("Usuario registrado correctamente. Inicia sesión.")
+        flash("Registro exitoso. Inicia sesión.")
         return redirect("/login")
     return render_template("registro.html")
 
@@ -94,11 +98,14 @@ def index():
     return render_template("index.html", productos=productos)
 
 # ===============================
-# AGREGAR PRODUCTO DESDE INICIO
+# AGREGAR PRODUCTO DESDE INICIO (solo admin)
 # ===============================
 @app.route("/agregar", methods=["POST"])
 @login_required
 def agregar():
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/")
     create_producto(request.form["nombre"],
                     float(request.form["precio"]),
                     int(request.form["cantidad"]))
@@ -124,6 +131,9 @@ def lista_productos():
 @app.route("/productos/nuevo", methods=["GET", "POST"])
 @login_required
 def nuevo_producto():
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/productos")
     if request.method == "POST":
         create_producto(request.form["nombre"],
                         float(request.form["precio"]),
@@ -134,6 +144,9 @@ def nuevo_producto():
 @app.route("/productos/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar_producto(id):
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/productos")
     producto = get_producto(id)
     if request.method == "POST":
         update_producto(id, request.form["nombre"],
@@ -145,6 +158,9 @@ def editar_producto(id):
 @app.route("/productos/eliminar/<int:id>")
 @login_required
 def eliminar_producto(id):
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/productos")
     delete_producto(id)
     return redirect("/productos")
 
@@ -189,6 +205,9 @@ def lista_clientes():
 @app.route("/clientes/nuevo", methods=["GET", "POST"])
 @login_required
 def nuevo_cliente():
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/clientes")
     if request.method == "POST":
         create_cliente(request.form["nombre"], request.form["email"],
                        request.form["telefono"], request.form["direccion"])
@@ -198,6 +217,9 @@ def nuevo_cliente():
 @app.route("/clientes/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar_cliente(id):
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/clientes")
     cliente = get_cliente(id)
     if request.method == "POST":
         update_cliente(id, request.form["nombre"], request.form["email"],
@@ -208,18 +230,24 @@ def editar_cliente(id):
 @app.route("/clientes/eliminar/<int:id>")
 @login_required
 def eliminar_cliente(id):
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/clientes")
     delete_cliente(id)
     return redirect("/clientes")
 
 # ===============================
-# USUARIOS - CRUD
+# USUARIOS - CRUD (solo admin)
 # ===============================
 @app.route("/usuarios")
 @login_required
 def usuarios():
+    if not current_user.es_admin():
+        flash("No tienes permisos para acceder a esta sección.")
+        return redirect("/")
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM usuarios")
+    cursor.execute("SELECT * FROM usuarios WHERE rol = 'admin'")
     lista_usuarios = cursor.fetchall()
     conn.close()
     return render_template("usuarios.html", usuarios=lista_usuarios)
@@ -227,12 +255,15 @@ def usuarios():
 @app.route("/agregar_usuario", methods=["POST"])
 @login_required
 def agregar_usuario():
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/")
     nombre = request.form["nombre"]
     email = request.form["email"]
     password = generate_password_hash(request.form["password"])
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO usuarios (nombre, email, password) VALUES (%s, %s, %s)",
+    cursor.execute("INSERT INTO usuarios (nombre, email, password, rol) VALUES (%s, %s, %s, 'usuario')",
                    (nombre, email, password))
     conn.commit()
     conn.close()
@@ -241,6 +272,9 @@ def agregar_usuario():
 @app.route("/editar_usuario/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar_usuario(id):
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/")
     conn = get_connection()
     cursor = conn.cursor()
     if request.method == "POST":
@@ -260,6 +294,9 @@ def editar_usuario(id):
 @app.route("/eliminar_usuario/<int:id>")
 @login_required
 def eliminar_usuario(id):
+    if not current_user.es_admin():
+        flash("No tienes permisos para realizar esta acción.")
+        return redirect("/")
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM usuarios WHERE id_usuario = %s", (id,))
